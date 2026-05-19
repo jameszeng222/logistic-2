@@ -4,19 +4,22 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/logistic-2/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>璺ㄥ鐗╂祦杩愯垂鏌ヨ骞冲彴</title>
+    <title>跨境物流运费查询平台</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script type="module" crossorigin src="/logistic-2/assets/index-CrUE19ix.js"></script>
     <link rel="stylesheet" crossorigin href="/logistic-2/assets/index-BydQewkm.css">
     <script>
-      // GitHub Pages 瀛愯矾寰勮矾鐢变慨澶?      (function() {
+      // GitHub Pages 子路径路由修复
+      (function() {
         var path = window.location.pathname;
         var base = '/logistic-2';
-        // 濡傛灉褰撳墠璺緞灏辨槸 base 鎴?base/锛屼笉闇€瑕佸鐞?        if (path === base || path === base + '/') return;
-        // 濡傛灉璺緞涓嶄互 base 寮€澶达紝鍙兘闇€瑕侀噸瀹氬悜锛?04 鎯呭喌锛?        if (!path.startsWith(base + '/')) {
-          // 淇濆瓨褰撳墠璺緞鍒?sessionStorage锛岃 React Router 澶勭悊
+        // 如果当前路径就是 base 或 base/，不需要处理
+        if (path === base || path === base + '/') return;
+        // 如果路径不以 base 开头，可能需要重定向（404 情况）
+        if (!path.startsWith(base + '/')) {
+          // 保存当前路径到 sessionStorage，让 React Router 处理
           sessionStorage.setItem('gh-pages-redirect', path);
         }
       })();
@@ -102,7 +105,7 @@
   visibility: visible !important;
 }
 
-/* 鍦ㄧЩ鍔ㄧ璁惧涓婂缁堟樉绀哄彇娑堟寜閽?*/
+/* 在移动端设备上始终显示取消按钮 */
 @media (hover: none) and (pointer: coarse) {
   .trae-badge-cancel {
     opacity: 1 !important;
@@ -158,7 +161,7 @@
 </svg>`;
               
               
-          // 涓婚閫夋嫨鍑芥暟 (澶嶇敤鑷?theme.ts)
+          // 主题选择函数 (复用自 theme.ts)
           function getLuminance(r, g, b) {
             return 0.299 * r + 0.587 * g + 0.114 * b;
           }
@@ -270,21 +273,21 @@
           }
         
               
-              // 娉ㄥ叆鏍峰紡
+              // 注入样式
               const style = document.createElement('style');
               style.id = 'trae-badge-plugin-styles';
               style.textContent = css;
               document.head.appendChild(style);
               
-              // 鍒涘缓 Badge 鍑芥暟
+              // 创建 Badge 函数
               function createBadge() {
-                // 绉婚櫎宸插瓨鍦ㄧ殑 badge
+                // 移除已存在的 badge
                 const existingBadge = document.getElementById('trae-badge-plugin');
                 if (existingBadge) {
                   existingBadge.remove();
                 }
                 
-                // 纭畾涓婚
+                // 确定主题
                 let variant = 'dark';
                 if (true) {
                   variant = autoSelectTheme('#root');
@@ -305,7 +308,7 @@
                   <div class="trae-badge-cancel">${cancelIcon}</div>
                 `;
                 
-                // 娣诲姞鐐瑰嚮浜嬩欢
+                // 添加点击事件
                 
                 badge.style.cursor = 'pointer';
                 badge.addEventListener('click', (e) => {
@@ -314,7 +317,7 @@
                 });
                 
                 
-                // 娣诲姞鍙栨秷鎸夐挳浜嬩欢
+                // 添加取消按钮事件
                 const cancelButton = badge.querySelector('.trae-badge-cancel');
                 if (cancelButton) {
                   cancelButton.addEventListener('click', (e) => {
@@ -327,16 +330,18 @@
                 return badge;
               }
               
-              // 鍒濆鍒涘缓 badge
-              // 绛夊緟 React 缁勪欢娓叉煋瀹屾垚鍚庡啀鍒涘缓 badge
+              // 初始创建 badge
+              // 等待 React 组件渲染完成后再创建 badge
               function initBadge() {
-                // 浣跨敤 requestAnimationFrame 绛夊緟娓叉煋瀹屾垚
+                // 使用 requestAnimationFrame 等待渲染完成
                 requestAnimationFrame(() => {
-                  // 鍐嶆妫€鏌ョ洰鏍囧厓绱犳槸鍚﹀瓨鍦?                  const targetElement = document.querySelector('#root');
+                  // 再次检查目标元素是否存在
+                  const targetElement = document.querySelector('#root');
                   if (targetElement) {
                     const badge = createBadge();
                   } else {
-                    // 濡傛灉杩樻病鏈夋壘鍒帮紝绛夊緟涓€娈垫椂闂村啀璇?                    setTimeout(() => {
+                    // 如果还没有找到，等待一段时间再试
+                    setTimeout(() => {
                       const badge = createBadge();
                     }, 500);
                   }
@@ -346,7 +351,7 @@
               if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', initBadge);
               } else {
-                // DOM 宸茬粡鍔犺浇瀹屾垚锛屼絾 React 鍙兘杩樻病娓叉煋
+                // DOM 已经加载完成，但 React 可能还没渲染
                 initBadge();
               }
               
