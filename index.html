@@ -10,6 +10,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script type="module" crossorigin src="/logistic-2/assets/index-CrUE19ix.js"></script>
     <link rel="stylesheet" crossorigin href="/logistic-2/assets/index-BydQewkm.css">
+    <script>
+      // GitHub Pages 瀛愯矾寰勮矾鐢变慨澶?      (function() {
+        var path = window.location.pathname;
+        var base = '/logistic-2';
+        // 濡傛灉褰撳墠璺緞灏辨槸 base 鎴?base/锛屼笉闇€瑕佸鐞?        if (path === base || path === base + '/') return;
+        // 濡傛灉璺緞涓嶄互 base 寮€澶达紝鍙兘闇€瑕侀噸瀹氬悜锛?04 鎯呭喌锛?        if (!path.startsWith(base + '/')) {
+          // 淇濆瓨褰撳墠璺緞鍒?sessionStorage锛岃 React Router 澶勭悊
+          sessionStorage.setItem('gh-pages-redirect', path);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
