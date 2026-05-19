@@ -1,0 +1,243 @@
+export const fedExZoneMap: Record<string, string> = {
+  // 分区A
+  MO: "A",
+
+  // 分区D
+  MN: "D",
+
+  // 分区E
+  BN: "E",
+  KH: "E",
+  GU: "E",
+  LA: "E",
+
+  // 分区F
+  AD: "F",
+  BG: "F",
+  HR: "F",
+  CY: "F",
+  CZ: "F",
+  EE: "F",
+  FO: "F",
+  GL: "F",
+  HU: "F",
+  IS: "F",
+  IL: "F",
+  LV: "F",
+  LI: "F",
+  LT: "F",
+  MT: "F",
+  PL: "F",
+  RO: "F",
+  RS: "F",
+  SK: "F",
+  SI: "F",
+  TR: "F",
+  UA: "F",
+
+  // 分区G
+  AS: "G",
+  AI: "G",
+  AG: "G",
+  AR: "G",
+  AW: "G",
+  BS: "G",
+  BB: "G",
+  BZ: "G",
+  BM: "G",
+  BO: "G",
+  BQ: "G",
+  VG: "G",
+  KY: "G",
+  CL: "G",
+  CO: "G",
+  CK: "G",
+  CR: "G",
+  CW: "G",
+  DM: "G",
+  DO: "G",
+  TL: "G",
+  EC: "G",
+  SV: "G",
+  FJ: "G",
+  GF: "G",
+  PF: "G",
+  GD: "G",
+  GP: "G",
+  GT: "G",
+  GY: "G",
+  HT: "G",
+  HN: "G",
+  JM: "G",
+  MH: "G",
+  MQ: "G",
+  MX: "G",
+  FM: "G",
+  MS: "G",
+  NC: "G",
+  NI: "G",
+  MP: "G",
+  PW: "G",
+  PA: "G",
+  PG: "G",
+  PY: "G",
+  PE: "G",
+  LC: "G",
+  WS: "G",
+  KN: "G",
+  SX: "G",
+  MF: "G",
+  VC: "G",
+  SR: "G",
+  TO: "G",
+  TT: "G",
+  TC: "G",
+  VI: "G",
+  UY: "G",
+  VU: "G",
+  VE: "G",
+
+  // 分区H
+  AF: "H",
+  AL: "H",
+  DZ: "H",
+  AO: "H",
+  AM: "H",
+  AZ: "H",
+  BH: "H",
+  BD: "H",
+  BY: "H",
+  BJ: "H",
+  BT: "H",
+  BA: "H",
+  BW: "H",
+  BF: "H",
+  BI: "H",
+  CM: "H",
+  CV: "H",
+  TD: "H",
+  CG: "H",
+  CI: "H",
+  CD: "H",
+  DJ: "H",
+  EG: "H",
+  ER: "H",
+  ET: "H",
+  GA: "H",
+  GM: "H",
+  GE: "H",
+  GH: "H",
+  GI: "H",
+  GN: "H",
+  IQ: "H",
+  JO: "H",
+  KZ: "H",
+  KE: "H",
+  KW: "H",
+  KG: "H",
+  LB: "H",
+  LS: "H",
+  LR: "H",
+  LY: "H",
+  MK: "H",
+  MG: "H",
+  MW: "H",
+  MV: "H",
+  ML: "H",
+  MR: "H",
+  MU: "H",
+  MA: "H",
+  MZ: "H",
+  NA: "H",
+  NP: "H",
+  AN: "H",
+  NE: "H",
+  NG: "H",
+  OM: "H",
+  PK: "H",
+  PS: "H",
+  QA: "H",
+  MD: "H",
+  RW: "H",
+  RE: "H",
+  SA: "H",
+  SN: "H",
+  SC: "H",
+  ZA: "H",
+  LK: "H",
+  SZ: "H",
+  SY: "H",
+  TG: "H",
+  TN: "H",
+  UG: "H",
+  TZ: "H",
+  AE: "H",
+  UZ: "H",
+
+  // 分区K
+  BE: "K",
+  FR: "K",
+  DE: "K",
+  IT: "K",
+  NL: "K",
+  ES: "K",
+  GB: "K",
+
+  // 分区M
+  AT: "M",
+  DK: "M",
+  FI: "M",
+  GR: "M",
+  LU: "M",
+  MC: "M",
+  NO: "M",
+  PT: "M",
+  RU: "M",
+  SE: "M",
+  CH: "M",
+
+  // 分区N
+  CA: "N",
+
+  // 分区O
+  IN: "O",
+
+  // 分区P
+  JP: "P",
+
+  // 分区Q
+  MY: "Q",
+
+  // 分区R
+  TH: "R",
+
+  // 分区S
+  PH: "S",
+
+  // 分区T
+  ID: "T",
+
+  // 分区U
+  AU: "U",
+  NZ: "U",
+
+  // 分区V
+  HK: "V",
+
+  // 分区X
+  TW: "X",
+
+  // 分区Y
+  SG: "Y",
+
+  // 分区Z
+  KR: "Z",
+
+  // 特殊：美国和波多黎各使用数字2（从文档中读取）
+  US: "2",
+  PR: "2",
+};
+
+export function getFedExZone(countryCode: string): string {
+  return fedExZoneMap[countryCode] || "";
+}
