@@ -1,13 +1,13 @@
 {
-  "lastSync": "2026-05-19T07:00:08.171Z",
+  "lastSync": "2026-05-19T10:16:47.216Z",
   "baseToken": "CEqSb9DltajJ1Dsax54c4UT9n7c",
   "recordCounts": {
-    "carriers": 6,
+    "carriers": 0,
     "zones": 0,
     "dhlPrices": 0,
     "fedexPrices": 0,
     "upsPrices": 0,
-    "fuelSurcharges": 3,
+    "fuelSurcharges": 0,
     "additionalSurcharges": 0,
     "yuntuRates": 0
   }
