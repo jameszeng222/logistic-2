@@ -1,0 +1,77 @@
+name: Sync Data from Feishu and Deploy
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+    inputs:
+      sync_reason:
+        description: '同步原因（可选）'
+        required: false
+        default: '手动触发同步'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  sync-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync data from Feishu
+        env:
+          LARK_APP_ID: ${{ secrets.LARK_APP_ID }}
+          LARK_APP_SECRET: ${{ secrets.LARK_APP_SECRET }}
+        run: |
+          echo "正在从飞书同步数据..."
+          node .github/scripts/sync-from-lark.js
+
+      - name: Build
+        run: npm run build
+
+      - name: Copy data files to dist
+        run: cp -r public/data dist/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Commit synced data
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add public/data/
+          git diff --staged --quiet || (git commit -m "Auto-sync data from Feishu - $(date +'%Y-%m-%d %H:%M:%S')" && git push)
+
+  deploy:
+    needs: sync-and-build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
