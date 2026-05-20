@@ -1,6 +1,7 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const BASE_TOKEN = 'CEqSb9DltajJ1Dsax54c4UT9n7c';
 const OUTPUT_DIR = path.join(__dirname, '..', '..', 'public', 'data');
@@ -8,6 +9,83 @@ const OUTPUT_DIR = path.join(__dirname, '..', '..', 'public', 'data');
 // 从环境变量获取飞书应用凭证（GitHub Actions 中使用）
 const APP_ID = process.env.LARK_APP_ID;
 const APP_SECRET = process.env.LARK_APP_SECRET;
+
+// 检查是否可以使用 lark-cli
+function canUseLarkCli() {
+  try {
+    execSync('lark-cli --version', { stdio: 'pipe' });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+// 使用 lark-cli 获取记录
+function fetchWithLarkCli(tableId) {
+  const records = [];
+  let offset = 0;
+  const limit = 200;
+  let hasMore = true;
+
+  while (hasMore) {
+    const args = [
+      'base', '+record-list',
+      '--base-token', BASE_TOKEN,
+      '--table-id', tableId,
+      '--limit', limit.toString(),
+      '--offset', offset.toString(),
+      '--format', 'json'
+    ];
+
+    const cmd = `lark-cli ${args.join(' ')}`;
+    let result;
+    try {
+      const output = execSync(cmd, {
+        encoding: 'utf8',
+        maxBuffer: 10 * 1024 * 1024
+      });
+      result = JSON.parse(output);
+    } catch (e) {
+      console.error('lark-cli error:', e.stderr || e.message);
+      break;
+    }
+
+    if (!result || !result.ok) {
+      console.error('Failed to fetch records:', result);
+      break;
+    }
+
+    const fields = result.data?.fields || [];
+    const items = result.data?.data || [];
+    const recordIds = result.data?.record_id_list || [];
+
+    if (items.length === 0) {
+      hasMore = false;
+      break;
+    }
+
+    // Convert array format to object format
+    for (let i = 0; i < items.length; i++) {
+      const row = items[i];
+      const record = { id: recordIds[i], fields: {} };
+      for (let j = 0; j < fields.length; j++) {
+        record.fields[fields[j]] = row[j];
+      }
+      records.push(record);
+    }
+
+    if (items.length < limit) {
+      hasMore = false;
+    } else {
+      offset += limit;
+      // 等待 500ms 避免请求过快
+      const start = Date.now();
+      while (Date.now() - start < 500) {}
+    }
+  }
+
+  return records;
+}
 
 // 获取 tenant access token
 async function getTenantToken() {
@@ -106,7 +184,6 @@ async function fetchAllRecords(tableId, token) {
     const items = result.data?.items || [];
     records.push(...items);
 
-    // 飞书 API 返回 has_more 和 total
     const total = result.data?.total || 0;
     hasMore = records.length < total;
     offset += items.length;
@@ -119,6 +196,23 @@ async function fetchAllRecords(tableId, token) {
   return records;
 }
 
+// 统一的获取记录函数
+async function getRecords(tableId) {
+  // 优先使用 lark-cli
+  if (canUseLarkCli()) {
+    console.log(`Using lark-cli to fetch table ${tableId}...`);
+    return fetchWithLarkCli(tableId);
+  }
+
+  // 回退到 OpenAPI
+  console.log(`Using OpenAPI to fetch table ${tableId}...`);
+  const token = await getTenantToken();
+  if (!token) {
+    throw new Error('无法获取访问令牌');
+  }
+  return fetchAllRecords(tableId, token);
+}
+
 async function main() {
   console.log('🚀 Starting sync from Feishu...\n');
 
@@ -127,27 +221,12 @@ async function main() {
     fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   }
 
-  // 获取 token
-  let token;
-  try {
-    token = await getTenantToken();
-  } catch (e) {
-    console.error('获取 token 失败:', e.message);
-    console.log('请确保已配置 LARK_APP_ID 和 LARK_APP_SECRET');
-    process.exit(1);
-  }
-
-  if (!token) {
-    console.error('无法获取访问令牌');
-    process.exit(1);
-  }
-
   const recordCounts = {};
 
   // 1. Sync carriers
   console.log('1. Syncing carriers...');
   try {
-    const carriers = await fetchAllRecords('tblKMO4ICBiBaFZD', token);
+    const carriers = await getRecords('tblKMO4ICBiBaFZD');
     const carriersData = carriers.map(r => ({
       id: r.fields['渠道ID'],
       name: r.fields['渠道名称'],
@@ -171,7 +250,7 @@ async function main() {
   // 2. Sync zones
   console.log('2. Syncing zones...');
   try {
-    const zones = await fetchAllRecords('tblRPQcNyWVts9zI', token);
+    const zones = await getRecords('tblRPQcNyWVts9zI');
     const zonesData = { dhl: {}, fedex: {}, ups: {} };
     for (const r of zones) {
       const carrier = (r.fields['渠道'] || '').toLowerCase();
@@ -192,7 +271,7 @@ async function main() {
   // 3. Sync DHL prices
   console.log('3. Syncing DHL prices...');
   try {
-    const dhlPrices = await fetchAllRecords('tbls1wHuCiGmSdCq', token);
+    const dhlPrices = await getRecords('tbls1wHuCiGmSdCq');
     const dhlPricesData = dhlPrices.map(r => ({
       weight: r.fields['重量'],
       zonePrices: {
@@ -217,7 +296,7 @@ async function main() {
   // 4. Sync FedEx prices
   console.log('4. Syncing FedEx prices...');
   try {
-    const fedexPrices = await fetchAllRecords('tblcDu3ZSgCGHqvm', token);
+    const fedexPrices = await getRecords('tblcDu3ZSgCGHqvm');
     const fedexPricesData = fedexPrices.map(r => ({
       weight: r.fields['重量'],
       zonePrices: {
@@ -255,7 +334,7 @@ async function main() {
   // 5. Sync UPS prices
   console.log('5. Syncing UPS prices...');
   try {
-    const upsPrices = await fetchAllRecords('tblGQjHqkCLWPzcT', token);
+    const upsPrices = await getRecords('tblGQjHqkCLWPzcT');
     const upsPricesData = upsPrices.map(r => ({
       weight: r.fields['重量'],
       zonePrices: {
@@ -272,7 +351,7 @@ async function main() {
   // 6. Sync fuel surcharges
   console.log('6. Syncing fuel surcharges...');
   try {
-    const fuel = await fetchAllRecords('tblI0yajPhIznBeS', token);
+    const fuel = await getRecords('tblI0yajPhIznBeS');
     const fuelData = fuel.map(r => ({
       carrierId: r.fields['渠道ID'],
       rate: r.fields['费率'] || 0,
@@ -289,7 +368,7 @@ async function main() {
   // 7. Sync additional surcharges
   console.log('7. Syncing additional surcharges...');
   try {
-    const additional = await fetchAllRecords('tbl2xi7GdQ1s2kGL', token);
+    const additional = await getRecords('tbl2xi7GdQ1s2kGL');
     const additionalData = additional.map(r => ({
       carrierId: r.fields['渠道ID'],
       countryCode: r.fields['国家代码'],
@@ -309,7 +388,7 @@ async function main() {
   // 8. Sync yuntu rates
   console.log('8. Syncing yuntu rates...');
   try {
-    const yuntuRates = await fetchAllRecords('tblRW31dQmIXd4m1', token);
+    const yuntuRates = await getRecords('tblRW31dQmIXd4m1');
     const yuntuData = yuntuRates.map(r => ({
       carrierId: r.fields['渠道ID'],
       countryCode: r.fields['国家代码'],
