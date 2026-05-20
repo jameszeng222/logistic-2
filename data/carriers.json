@@ -1,1 +1,92 @@
-[]
+[
+  {
+    "id": "yuntu-standard",
+    "name": "云途标快",
+    "code": "YT-BK",
+    "billingMode": "yuntu",
+    "volumetricFactor": 5000,
+    "services": [
+      "标准快递"
+    ],
+    "color": "#E63946",
+    "estimatedDays": {
+      "min": 7,
+      "max": 15
+    }
+  },
+  {
+    "id": "yuntu-economy",
+    "name": "云途特惠",
+    "code": "YT-TH",
+    "billingMode": "yuntu",
+    "volumetricFactor": 8000,
+    "services": [
+      "经济快递"
+    ],
+    "color": "#2A9D8F",
+    "estimatedDays": {
+      "min": 10,
+      "max": 20
+    }
+  },
+  {
+    "id": "yuntu-wig",
+    "name": "云途假发专线",
+    "code": "YT-WIG",
+    "billingMode": "yuntu",
+    "volumetricFactor": 6000,
+    "services": [
+      "假发专线"
+    ],
+    "color": "#E9C46A",
+    "estimatedDays": {
+      "min": 7,
+      "max": 15
+    }
+  },
+  {
+    "id": "dhl",
+    "name": "DHL",
+    "code": "DHL",
+    "billingMode": "express",
+    "volumetricFactor": 5000,
+    "services": [
+      "DHL Express"
+    ],
+    "color": "#FFCC00",
+    "estimatedDays": {
+      "min": 2,
+      "max": 5
+    }
+  },
+  {
+    "id": "ups",
+    "name": "UPS",
+    "code": "UPS",
+    "billingMode": "express",
+    "volumetricFactor": 5000,
+    "services": [
+      "UPS Express"
+    ],
+    "color": "#351C15",
+    "estimatedDays": {
+      "min": 2,
+      "max": 5
+    }
+  },
+  {
+    "id": "fedex",
+    "name": "FedEx",
+    "code": "FDX",
+    "billingMode": "express",
+    "volumetricFactor": 5000,
+    "services": [
+      "FedEx International"
+    ],
+    "color": "#4D148C",
+    "estimatedDays": {
+      "min": 2,
+      "max": 5
+    }
+  }
+]
