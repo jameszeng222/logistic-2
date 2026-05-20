@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "carrierId": "dhl",
+    "rate": 0.16,
+    "effectiveDate": "2025-01-01 00:00:00",
+    "expiryDate": "2099-12-31 00:00:00"
+  },
+  {
+    "carrierId": "fedex",
+    "rate": 0.15,
+    "effectiveDate": "2025-01-01 00:00:00",
+    "expiryDate": "2099-12-31 00:00:00"
+  },
+  {
+    "carrierId": "ups",
+    "rate": 0.14,
+    "effectiveDate": "2025-01-01 00:00:00",
+    "expiryDate": "2099-12-31 00:00:00"
+  }
+]
