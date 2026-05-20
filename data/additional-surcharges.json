@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "carrierId": null,
+    "countryCode": null,
+    "name": null,
+    "amount": 0,
+    "billingMethod": "per_kg",
+    "effectiveDate": null,
+    "expiryDate": null
+  }
+]
