@@ -3,6 +3,8 @@
     "id": "yuntu-standard",
     "name": "云途标快",
     "code": "YT-BK",
+    "logo": "",
+    "description": "",
     "billingMode": "yuntu",
     "volumetricFactor": 5000,
     "services": [
@@ -18,6 +20,8 @@
     "id": "yuntu-economy",
     "name": "云途特惠",
     "code": "YT-TH",
+    "logo": "",
+    "description": "",
     "billingMode": "yuntu",
     "volumetricFactor": 8000,
     "services": [
@@ -33,6 +37,8 @@
     "id": "yuntu-wig",
     "name": "云途假发专线",
     "code": "YT-WIG",
+    "logo": "",
+    "description": "",
     "billingMode": "yuntu",
     "volumetricFactor": 6000,
     "services": [
@@ -48,6 +54,8 @@
     "id": "dhl",
     "name": "DHL",
     "code": "DHL",
+    "logo": "",
+    "description": "",
     "billingMode": "express",
     "volumetricFactor": 5000,
     "services": [
@@ -63,6 +71,8 @@
     "id": "ups",
     "name": "UPS",
     "code": "UPS",
+    "logo": "",
+    "description": "",
     "billingMode": "express",
     "volumetricFactor": 5000,
     "services": [
@@ -78,6 +88,8 @@
     "id": "fedex",
     "name": "FedEx",
     "code": "FDX",
+    "logo": "",
+    "description": "",
     "billingMode": "express",
     "volumetricFactor": 5000,
     "services": [
