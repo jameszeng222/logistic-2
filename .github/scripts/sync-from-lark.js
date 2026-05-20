@@ -12,7 +12,8 @@ const APP_SECRET = process.env.LARK_APP_SECRET;
 // 获取 tenant access token
 async function getTenantToken() {
   if (!APP_ID || !APP_SECRET) {
-    console.log('未配置 LARK_APP_ID 和 LARK_APP_SECRET，使用个人 token 模式');
+    console.error('错误: 未配置 LARK_APP_ID 和 LARK_APP_SECRET');
+    console.error('请在 GitHub Secrets 中配置这两个值');
     return null;
   }
 
@@ -85,17 +86,15 @@ async function feishuApi(path, token) {
   });
 }
 
-// 获取所有记录
+// 获取所有记录（使用 offset 分页）
 async function fetchAllRecords(tableId, token) {
   const records = [];
+  let offset = 0;
+  const pageSize = 500;
   let hasMore = true;
-  let pageToken = '';
 
   while (hasMore) {
-    let apiPath = `/open-apis/bitable/v1/apps/${BASE_TOKEN}/tables/${tableId}/records?page_size=500`;
-    if (pageToken) {
-      apiPath += `&page_token=${pageToken}`;
-    }
+    const apiPath = `/open-apis/bitable/v1/apps/${BASE_TOKEN}/tables/${tableId}/records?page_size=${pageSize}&offset=${offset}`;
 
     const result = await feishuApi(apiPath, token);
 
@@ -104,9 +103,13 @@ async function fetchAllRecords(tableId, token) {
       break;
     }
 
-    records.push(...(result.data?.items || []));
-    hasMore = result.data?.has_more || false;
-    pageToken = result.data?.page_token || '';
+    const items = result.data?.items || [];
+    records.push(...items);
+
+    // 飞书 API 返回 has_more 和 total
+    const total = result.data?.total || 0;
+    hasMore = records.length < total;
+    offset += items.length;
 
     if (hasMore) {
       await new Promise(r => setTimeout(r, 200));
