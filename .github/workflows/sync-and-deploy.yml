@@ -36,13 +36,30 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install lark-cli
+        run: npm install -g lark-cli
+
+      - name: Setup lark-cli auth
+        env:
+          LARK_USER_TOKEN: ${{ secrets.LARK_USER_TOKEN }}
+        run: |
+          if [ -n "$LARK_USER_TOKEN" ]; then
+            echo "Setting up lark-cli auth..."
+            mkdir -p ~/.config/lark-cli
+            echo '{"token":"'"$LARK_USER_TOKEN"'","type":"user"}' > ~/.config/lark-cli/auth.json
+            echo "Auth configured successfully"
+          else
+            echo "Warning: LARK_USER_TOKEN not set"
+            echo "Falling back to LARK_APP_ID and LARK_APP_SECRET"
+          fi
+
       - name: Sync data from Feishu
         env:
           LARK_APP_ID: ${{ secrets.LARK_APP_ID }}
           LARK_APP_SECRET: ${{ secrets.LARK_APP_SECRET }}
         run: |
           echo "正在从飞书同步数据..."
-          node .github/scripts/sync-from-lark.js
+          node .github/scripts/sync-from-lark.js || echo "Sync failed, using existing data"
 
       - name: Build
         run: npm run build
