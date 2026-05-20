@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import Layout from "@/components/Layout";
 import QueryPage from "@/pages/QueryPage";
 import TemplatesPage from "@/pages/TemplatesPage";
@@ -8,10 +8,12 @@ import ChannelsPage from "@/pages/ChannelsPage";
 import SurchargePage from "@/pages/SurchargePage";
 import HistoryPage from "@/pages/HistoryPage";
 import { loadAllData, clearCache } from "@/services/dataService";
+import { loadSyncData, applySyncData, shouldSync, getLastSyncTime } from "@/services/syncService";
 
 function DataSyncProvider({ children }: { children: React.ReactNode }) {
   const [isSyncing, setIsSyncing] = useState(true);
   const [syncError, setSyncError] = useState("");
+  const [lastSync, setLastSync] = useState<string | null>(null);
 
   useEffect(() => {
     const doSync = async () => {
@@ -21,6 +23,14 @@ function DataSyncProvider({ children }: { children: React.ReactNode }) {
         // 清除缓存，强制从服务器获取最新数据
         clearCache();
         await loadAllData();
+
+        // 尝试从飞书同步数据
+        const syncData = await loadSyncData();
+        if (syncData) {
+          applySyncData(syncData);
+          setLastSync(getLastSyncTime());
+        }
+
         console.log("[App] Initial sync completed");
       } catch (error) {
         console.error("[App] Initial sync failed:", error);
@@ -34,11 +44,37 @@ function DataSyncProvider({ children }: { children: React.ReactNode }) {
 
     // 每5分钟自动同步一次
     const interval = setInterval(() => {
-      loadAllData().catch(console.error);
+      if (shouldSync()) {
+        loadSyncData().then(data => {
+          if (data) {
+            applySyncData(data);
+            setLastSync(getLastSyncTime());
+          }
+        }).catch(console.error);
+      }
     }, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, []);
+
+  const handleManualSync = async () => {
+    setIsSyncing(true);
+    setSyncError("");
+    try {
+      clearCache();
+      await loadAllData();
+      const syncData = await loadSyncData();
+      if (syncData) {
+        applySyncData(syncData);
+        setLastSync(getLastSyncTime());
+      }
+    } catch (error) {
+      console.error("[App] Manual sync failed:", error);
+      setSyncError("数据同步失败，请刷新页面重试");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   if (isSyncing) {
     return (
@@ -68,12 +104,31 @@ function DataSyncProvider({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+        {lastSync && (
+          <span className="text-xs text-[#A89DB0] bg-white/80 px-2 py-1 rounded">
+            同步: {new Date(lastSync).toLocaleString('zh-CN')}
+          </span>
+        )}
+        <button
+          onClick={handleManualSync}
+          className="flex items-center gap-1 px-3 py-1.5 bg-[#3E2349] text-white text-sm rounded-lg hover:bg-[#5A3A6A] transition-colors shadow-lg"
+          title="手动同步飞书数据"
+        >
+          <RefreshCw className="w-4 h-4" />
+          同步
+        </button>
+      </div>
+      {children}
+    </>
+  );
 }
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/logistic-2">
       <DataSyncProvider>
         <Routes>
           <Route path="/" element={<Layout />}>
