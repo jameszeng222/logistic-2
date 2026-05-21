@@ -94,7 +94,6 @@ export function applySyncData(data: SyncData) {
           volumetricFactor: carrier.volumetricFactor,
           services: carrier.services || ["standard"],
           color: carrier.color,
-          estimatedDays: carrier.estimatedDays,
         });
       }
     });
@@ -139,7 +138,6 @@ export function applySyncData(data: SyncData) {
         countryCode: item.countryCode,
         name: item.name,
         amount: item.amount,
-        billingMethod: item.billingMethod || "per_kg",
         startDate: item.effectiveDate,
         endDate: item.expiryDate,
         isPermanent: !item.effectiveDate && !item.expiryDate,
@@ -153,14 +151,14 @@ export function applySyncData(data: SyncData) {
     const rateStore = useRateStore.getState();
     data.yuntuRates.forEach((rate) => {
       if (rate.carrierId && rate.countryCode) {
-        rateStore.setRate(rate.carrierId, rate.countryCode, {
-          countryName: rate.countryName,
-          countryCode: rate.countryCode,
-          weightStart: rate.weightStart,
-          weightEnd: rate.weightEnd,
-          unitPrice: rate.unitPrice,
-          registrationFee: rate.registrationFee,
-        });
+        rateStore.updateYuntuTiers(rate.carrierId, rate.countryCode, [
+          {
+            weightFrom: rate.weightStart || 0,
+            weightTo: rate.weightEnd || 999999,
+            unitPrice: rate.unitPrice || 0,
+            registrationFee: rate.registrationFee || 0,
+          }
+        ], { min: 5, max: 15 });
       }
     });
     console.log("✓ Yuntu rates synced:", data.yuntuRates.length);
